@@ -5,6 +5,7 @@ import cors from "cors";
 import { socket, UserManager } from "./Manger/User";
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const server = http.createServer(app)
 app.get('/', (req, res) => {
@@ -14,7 +15,7 @@ app.get('/', (req, res) => {
 
 const userManager=new UserManager()
 
-const wss = new WebSocketServer({ server: server })
+const wss = new WebSocketServer({ server: server})
 
 wss.on('connection', (socket: socket) => {
 
@@ -22,10 +23,12 @@ wss.on('connection', (socket: socket) => {
 
     socket.on("message", (message) => {
         const data = JSON.parse(message.toLocaleString())
-        socket.id=data.UserId
+       const {event}=data
+       if (event === "User") {
+           socket.id = data.UserId
 
-        userManager.addUser("randomName", socket);
-        socket.send(JSON.stringify(message));
+           userManager.addUser("randomName", socket);
+       }
     })
     socket.on("close", () => {
 
